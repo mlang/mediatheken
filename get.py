@@ -36,7 +36,7 @@ sender_begin = '''
 <ul>
 '''
 film = '''
-<li><a href="{{url}}">{{name}}</a></li>
+<li>{{ date }} {{ time }}: <a href="{{url}}">{{name}}</a></li>
 '''
 sender_end = '''</ul>'''
 
@@ -51,9 +51,22 @@ d = defaultdict(list)
 for row in data:
     if len(row[0]) > 0:
         sender = row[0]
-    d[sender].append({'name': row[2], 'url': row[8]})
+    d[sender].append({
+        'name': row[2],
+        'date': row[3],
+        'time': row[4],
+        'url': row[8]
+    })
 data = None
 sender = None
+for movies in d.values():
+    def yyyymmddhhmm(dict):
+        date = dict['date']
+        if len(date) == 10:
+            return date[6:]+date[3:5]+date[0:2]+dict['time']+dict['name']
+        else:
+            return '0000000000:00:00'+dict['name']
+    movies.sort(key=yyyymmddhhmm)
 
 ###############################################################################
 
