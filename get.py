@@ -20,6 +20,7 @@ data = data[2:]
 header = '''<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 <head>
+<title>{{ title }}</title>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 </head>
 <body>
@@ -42,25 +43,31 @@ sender_end = '''</ul>'''
 link_to_sender = '''<a href="{{name}}.html">{{name}}</a> '''
 
 env = Environment(loader=DictLoader(globals()))
-sender= None
+def render(file, template, **kwargs):
+    print(env.get_template(template).render(kwargs), file=file)
+        
+sender = None
 d = defaultdict(list)
 for row in data:
     if len(row[0]) > 0:
         sender = row[0]
     d[sender].append({'name': row[2], 'url': row[8]})
+data = None
+sender = None
 
+###############################################################################
 
 for sender, filme in d.items():
     with open("%s.html" % sender, "w") as html:
-        print(env.get_template('header').render({'title': sender}), file=html)
-        print(env.get_template('sender_begin').render({'name': sender}), file=html)
+        render(html, 'header', title=sender)
+        render(html, 'sender_begin', name=sender)
         for f in filme:
-            print(env.get_template('film').render(f), file=html)
-        print(env.get_template('sender_end').render(), file=html)
-        print(env.get_template('footer').render(), file=html)
+            render(html, 'film', **f)
+        render(html, 'sender_end')
+        render(html, 'footer')
 
 with open('index.html', 'w') as html:
-    print(env.get_template('header').render(), file=html)
+    render(html, 'header', title='Mediatheken')
     for sender in sorted(d.keys()):
-        print(env.get_template('link_to_sender').render({'name': sender}), file=html)
-    print(env.get_template('footer').render(), file=html)
+        render(html, 'link_to_sender', name=sender)
+    render(html, 'footer')
