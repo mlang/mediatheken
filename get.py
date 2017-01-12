@@ -66,7 +66,7 @@ for movies in d.values():
             return date[6:]+date[3:5]+date[0:2]+dict['time']+dict['name']
         else:
             return '0000000000:00:00'+dict['name']
-    movies.sort(key=yyyymmddhhmm)
+    movies.sort(key=yyyymmddhhmm, reverse=True)
 
 ###############################################################################
 
