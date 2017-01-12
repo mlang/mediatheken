@@ -32,13 +32,17 @@ footer = '''
 '''
 
 sender_begin = '''
-<h1><a name="{{name|escape}}">{{name}}</a></h1>
+<h1>>{{name}}</h1>
 <ul>
 '''
+
 film = '''
 <li>{{ date }} {{ time }}: <a href="{{url}}">{{name}}</a></li>
 '''
-sender_end = '''</ul>'''
+
+sender_end = '''
+</ul>
+'''
 
 link_to_sender = '''<a href="{{name}}.html">{{name}}</a> '''
 
