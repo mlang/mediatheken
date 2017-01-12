@@ -55,7 +55,7 @@ for sender, filme in d.items():
         print(env.get_template('header').render({'title': sender}), file=html)
         print(env.get_template('sender_begin').render({'name': sender}), file=html)
         for f in filme:
-            print(env.get_template('film').render(f).encode('utf-8'), file=html)
+            print(env.get_template('film').render(f), file=html)
         print(env.get_template('sender_end').render(), file=html)
         print(env.get_template('footer').render(), file=html)
 
