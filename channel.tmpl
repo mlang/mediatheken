@@ -5,7 +5,7 @@
 <ul>
 {% for movie in movies %}
   <li>{{ movie.date }} {{ movie.time }}:
-      <a href="{{movie.url}}">{{movie.name}}</a>
+      <a href="{{movie.url}}">{{movie.name|escape}}</a>
   </li>
 {% endfor %}
 </ul>
