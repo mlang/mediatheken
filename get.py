@@ -13,28 +13,31 @@ def main():
     """Get mediathek-Data and write HTML files."""
     response = get('http://m1.picn.de/f/Filmliste-akt.xz')
     response.raise_for_status()
-    data = LZMADecompressor().decompress(response.content).decode('UTF-8')
+    text = LZMADecompressor().decompress(response.content).decode('UTF-8')
     # Change from dictionary with multiple identical keys to array
-    data = sub(r'^  "Filmliste" :', "", data, flags=MULTILINE)
-    data = sub(r'^  "X" :', "", data, flags=MULTILINE)
-    data = '[' + data[1:-2] + ']'
-    data = loads(data)
+    text = sub(r'^  "Filmliste" :', "", text, flags=MULTILINE)
+    text = sub(r'^  "X" :', "", text, flags=MULTILINE)
+    text = '[' + text[1:-2] + ']'
+    json = loads(text)
+    text = None
     # Remove header
-    data = data[2:]
+    json.pop(0)
+    json.pop(0)
 
-    sender = None
+    channel = None
     channels = defaultdict(list)
-    for row in data:
+    for row in json:
         if len(row[0]) > 0:
-            sender = row[0]
-        channels[sender].append({
+            channel = row[0]
+        channels[channel].append({
             'name': row[2],
             'date': row[3],
             'time': row[4],
             'url': row[8]
         })
-    data = None
+    json = None
 
+    # Sort
     for movies in channels.values():
         def yyyymmddhhmm(k):
             """Concatenate date, time and title."""
