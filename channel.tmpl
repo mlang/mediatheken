@@ -1,0 +1,12 @@
+{% extends "base.tmpl" %}
+{% block title %}{{ name }}{% endblock %}
+{% block body %}
+<h1>>{{name}}</h1>
+<ul>
+{% for movie in movies %}
+  <li>{{ movie.date }} {{ movie.time }}:
+      <a href="{{movie.url}}">{{movie.name}}</a>
+  </li>
+{% endfor %}
+</ul>
+{% endblock %}

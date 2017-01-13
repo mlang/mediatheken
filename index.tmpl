@@ -1,0 +1,7 @@
+{% extends "base.tmpl" %}
+{% block title %}Home{% endblock %}
+{% block body %}
+{% for channel in channels %}
+<a href="{{ channel }}.html">{{ channel }}</a>
+{% endfor %}
+{% endblock %}
