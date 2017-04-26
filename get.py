@@ -9,36 +9,33 @@ from re import sub, MULTILINE
 from jinja2 import Environment, FileSystemLoader
 from requests import get
 
-def main():
-    """Get mediathek-Data and write HTML files."""
+def fetch():
+    """Get the data and return a dictionary of channels to a list of movies."""
     response = get('http://m1.picn.de/f/Filmliste-akt.xz')
     response.raise_for_status()
-    text = LZMADecompressor().decompress(response.content).decode('UTF-8')
+    data = LZMADecompressor().decompress(response.content).decode('UTF-8')
     # Change from dictionary with multiple identical keys to array
-    text = sub(r'^  "Filmliste" :', "", text, flags=MULTILINE)
-    text = sub(r'^  "X" :', "", text, flags=MULTILINE)
-    text = '[' + text[1:-2] + ']'
-    json = loads(text)
-    text = None
+    data = sub(r'"Filmliste":', "", data, flags=MULTILINE)
+    data = sub(r',"X":', ",", data, flags=MULTILINE)
+    data = '[' + data[1:-1] + ']'
+    data = loads(data)
     # Remove header
-    json.pop(0)
-    json.pop(0)
+    data = data[2:]
 
-    channel = None
-    channels = defaultdict(list)
-    for row in json:
+    sender = None
+    result = defaultdict(list)
+    for row in data:
         if len(row[0]) > 0:
-            channel = row[0]
-        channels[channel].append({
+            sender = row[0]
+        result[sender].append({
             'name': row[2],
             'date': row[3],
             'time': row[4],
             'url': row[8]
         })
-    json = None
-
-    # Sort
-    for movies in channels.values():
+    data = None
+    sender = None
+    for movies in result.values():
         def yyyymmddhhmm(k):
             """Concatenate date, time and title."""
             date = k['date']
@@ -47,15 +44,23 @@ def main():
             else:
                 return '0000000000:00:00'+k['name']
         movies.sort(key=yyyymmddhhmm, reverse=True)
+    return result
 
+###############################################################################
+
+def main():
+    """Fetch JSON and write HTML."""
     env = Environment(loader=FileSystemLoader(dirname(__file__)))
     def render(file, template, **kwargs):
         """A helper function for rendering templates to a file."""
-        print(env.get_template(template).render(kwargs), file=file)
+        str = env.get_template(template).render(kwargs)
+        file.write(str.encode('UTF-8'))
+    channels = fetch()
+
     for channel, movies in channels.items():
-        with open("%s.html" % channel, "w") as html:
+        with open("%s.html" % channel, "wb") as html:
             render(html, 'channel.tmpl', name=channel, movies=movies)
-    with open('index.html', 'w') as html:
+    with open('index.html', 'wb') as html:
         render(html, 'index.tmpl', channels=sorted(channels.keys()))
 
 if __name__ == '__main__':
